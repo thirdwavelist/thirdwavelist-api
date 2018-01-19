@@ -1,0 +1,24 @@
+{
+  "name": "thirdwavelist-api",
+  "version": "1.0.0",
+  "description": "API backend for ThirdWaveList",
+  "author": "Antal János Monori <anthonymonori@gmail.com>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hipinc/api.thirdwavelist"
+  },
+  "dependencies": {
+    "moment": "2.19.3",
+    "node-uuid": "1.4.3",
+    "serverless": "^1.25.0"
+  },
+  "devDependencies": {
+    "aws-sdk": "2.67.0"
+  },
+  "bundledDependencies": [
+    "moment",
+    "node-uuid"
+  ],
+  "private": true
+}

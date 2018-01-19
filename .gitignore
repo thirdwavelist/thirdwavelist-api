@@ -1,0 +1,7 @@
+node_modules/
+lambda.zip
+swagger.json
+.DS_Store
+package-lock.json
+.serverless
+.vscode
