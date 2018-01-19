@@ -86,16 +86,21 @@ module.exports.createCafes = (event, context, callback) => {
     });
 };
 
-/* GET /cafe/{id} */
-module.exports.getCafe = (event, context, callback) => {
+/* GET /cafe/{city}/{cafe} */
+module.exports.lookupCafe = (event, context, callback) => {
     const params = {
         TableName: "thirdwavelist-cafe",
-        Key: {
-            uid: event.pathParameters.id
-        }
+        ExpressionAttributeNames: {
+            "#name": "name"
+        },
+        ExpressionAttributeValues: {
+            ":city": event.pathParameters.city, 
+            ":cafe": event.pathParameters.cafe
+        },
+        FilterExpression: "city = :city AND #name = :cafe"
     };
 
-    db.get(params, (error, result) => {
+    db.scan(params, (error, result) => {
         if (error) {
             callback(null, {
                 statusCode: error.statusCode || 501,
@@ -108,7 +113,7 @@ module.exports.getCafe = (event, context, callback) => {
         const response = {
             statusCode: 200,
             headers: { 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify(result.Item)
+            body: JSON.stringify(result.Items[0])
         };
         callback(null, response);
     });

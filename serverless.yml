@@ -55,11 +55,11 @@ functions:
           private: true
           cors: true
 
-  getCafe:
-    handler: handler.getCafe
+  lookupCafe:
+    handler: handler.lookupCafe
     events:
       - http:
-          path: cafe/{id}
+          path: {city}/{cafe}
           method: get
           private: true
           cors: true
