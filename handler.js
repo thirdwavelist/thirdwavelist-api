@@ -2,6 +2,7 @@ const moment = require('moment');
 const uuid = require('node-uuid');
 const aws = require('aws-sdk');
 const db = new aws.DynamoDB.DocumentClient();
+const aeclient = require('aws-elasticsearch-client');
 
 /* GET /cafe */
 module.exports.listCafes = (event, context, callback) => {
@@ -88,24 +89,36 @@ module.exports.createCafes = (event, context, callback) => {
 
 /* GET /cafe/{city}/{cafe} */
 module.exports.lookupCafe = (event, context, callback) => {
-    const params = {
-        TableName: "thirdwavelist-cafe",
-        ExpressionAttributeNames: {
-            "#name": "name"
-        },
-        ExpressionAttributeValues: {
-            ":city": event.pathParameters.city, 
-            ":cafe": event.pathParameters.cafe
-        },
-        FilterExpression: "city = :city AND #name = :cafe"
+    const options = {
+        host: 'https://search-cafe-iktxccp65hpx3sigupd4gz3qiu.us-east-1.es.amazonaws.com'
     };
+    const client = aeclient(options);
 
-    db.scan(params, (error, result) => {
+    // const index = 'thirdwavelist-cafe';
+    // const type = 'text';
+    const query = {
+        from: 0,
+        size: 10,
+        // sort: ['name'],
+        query: {
+            "query_string" : {
+                "fields" : ["name", "city"],
+                "query" : event.pathParameters.city + " AND " + event.pathParameters.cafe
+            }
+        }
+    };
+    
+    client.search({
+        // index: index,
+        // type: type,
+        body: query
+      }, (error, result) => {
         if (error) {
+            console.log(error);
             callback(null, {
                 statusCode: error.statusCode || 501,
                 headers: { 'Content-Type': 'text/plain' },
-                body: 'Couldn\'t fetch the cafe item.'
+                body: 'No response received.'
             });
             return;
         }
@@ -113,7 +126,7 @@ module.exports.lookupCafe = (event, context, callback) => {
         const response = {
             statusCode: 200,
             headers: { 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify(result.Items[0])
+            body: JSON.stringify(result.hits.hits[0]._source)
         };
         callback(null, response);
     });

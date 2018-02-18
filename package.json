@@ -9,12 +9,11 @@
     "url": "https://github.com/hipinc/api.thirdwavelist"
   },
   "dependencies": {
+    "aws-elasticsearch-client": "1.1.0",
+    "aws-sdk": "2.138.0",
     "moment": "2.19.3",
     "node-uuid": "1.4.3",
-    "serverless": "^1.25.0"
-  },
-  "devDependencies": {
-    "aws-sdk": "2.67.0"
+    "serverless": "^1.26.0"
   },
   "bundledDependencies": [
     "moment",
