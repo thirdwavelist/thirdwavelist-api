@@ -63,7 +63,8 @@ module.exports.createCafes = (event, context, callback) => {
                 bean_origin_blend: cafe.bean_origin_blend || false,
                 price_doppio: cafe.price_doppio || "Ft0.00",
                 extra_google_placeid: cafe.extra_google_placeid || "",
-                extra_instagram_locationid: cafe.extra_instagram_locationid || ""
+                extra_instagram_locationid: cafe.extra_instagram_locationid || "",
+                latlong: cafe.latlong || ""
             }
         };
 
