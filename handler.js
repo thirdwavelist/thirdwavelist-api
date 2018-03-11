@@ -40,6 +40,7 @@ module.exports.createCafes = (event, context, callback) => {
                 name: cafe.name || "",
                 city: cafe.city || "",
                 address: cafe.address || "",
+                extra_url_name: cafe.extra_url_name || "",
                 extra_thumbnail: cafe.extra_thumbnail || "",
                 social_facebook: cafe.social_facebook || "",
                 social_instagram: cafe.social_instagram || "",
@@ -90,36 +91,24 @@ module.exports.createCafes = (event, context, callback) => {
 
 /* GET /cafe/{city}/{cafe} */
 module.exports.lookupCafe = (event, context, callback) => {
-    const options = {
-        host: 'https://search-cafe-iktxccp65hpx3sigupd4gz3qiu.us-east-1.es.amazonaws.com'
+    const params = {
+        TableName: "thirdwavelist-cafe",
+        ExpressionAttributeNames: {
+            "#name": "extra_url_name"
+        },
+        ExpressionAttributeValues: {
+            ":city": event.pathParameters.city, 
+            ":cafe": event.pathParameters.cafe
+        },
+        FilterExpression: "city = :city AND #name = :cafe"
     };
-    const client = aeclient(options);
 
-    // const index = 'thirdwavelist-cafe';
-    // const type = 'text';
-    const query = {
-        from: 0,
-        size: 10,
-        // sort: ['name'],
-        query: {
-            "query_string" : {
-                "fields" : ["name", "city"],
-                "query" : event.pathParameters.city + " AND " + event.pathParameters.cafe
-            }
-        }
-    };
-    
-    client.search({
-        // index: index,
-        // type: type,
-        body: query
-      }, (error, result) => {
+    db.scan(params, (error, result) => {
         if (error) {
-            console.log(error);
             callback(null, {
                 statusCode: error.statusCode || 501,
                 headers: { 'Content-Type': 'text/plain' },
-                body: 'No response received.'
+                body: 'Couldn\'t fetch the cafe item.'
             });
             return;
         }
@@ -127,7 +116,7 @@ module.exports.lookupCafe = (event, context, callback) => {
         const response = {
             statusCode: 200,
             headers: { 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify(result.hits.hits[0]._source)
+            body: JSON.stringify(result.Items[0])
         };
         callback(null, response);
     });
