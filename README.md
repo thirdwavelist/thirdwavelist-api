@@ -10,7 +10,7 @@ This setup uses the following Amazon Web Services:
 
 The API is based on: Swagger / OpenAPI Specification
 
-
+### Instructions
 
 1. Clone this repository
 
@@ -93,7 +93,7 @@ aws apigateway create-deployment --rest-api-id $ApiId --stage-name v1
 export ApiGatewayEndpoint="$ApiId.execute-api.us-east-1.amazonaws.com/v1"
 ```
 
-## Use the RESTful API
+### Use the RESTful API
 
 The following examples assume that you replace `$ApiGatewayEndpoint` with `$ApiId.execute-api.us-east-1.amazonaws.com`
 
@@ -128,3 +128,13 @@ aws cloudformation delete-stack --stack-name thirdwavelist-apigateway
 ```bash
 aws s3 rb --force s3://api.thirdwavelist
 ```
+
+## Update database
+
+1. `csv2json ./input.csv -o ./output.json -p -s ';'`
+
+2. `sed 's/"TRUE"/true/g' output.json > output.json.temp; mv -f output.json.temp output.json`
+
+3. `sed 's/"FALSE"/false/g' output.json > output.json.temp; mv -f output.json.temp output.json`
+
+4. `sed 's/null/" "/g' output.json > output.json.temp; mv -f output.json.temp output.json`

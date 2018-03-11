@@ -2,6 +2,7 @@ const moment = require('moment');
 const uuid = require('node-uuid');
 const aws = require('aws-sdk');
 const db = new aws.DynamoDB.DocumentClient();
+const aeclient = require('aws-elasticsearch-client');
 
 /* GET /cafe */
 module.exports.listCafes = (event, context, callback) => {
@@ -39,6 +40,7 @@ module.exports.createCafes = (event, context, callback) => {
                 name: cafe.name || "",
                 city: cafe.city || "",
                 address: cafe.address || "",
+                extra_url_name: cafe.extra_url_name || "",
                 extra_thumbnail: cafe.extra_thumbnail || "",
                 social_facebook: cafe.social_facebook || "",
                 social_instagram: cafe.social_instagram || "",
@@ -62,7 +64,8 @@ module.exports.createCafes = (event, context, callback) => {
                 bean_origin_blend: cafe.bean_origin_blend || false,
                 price_doppio: cafe.price_doppio || "Ft0.00",
                 extra_google_placeid: cafe.extra_google_placeid || "",
-                extra_instagram_locationid: cafe.extra_instagram_locationid || ""
+                extra_instagram_locationid: cafe.extra_instagram_locationid || "",
+                latlong: cafe.latlong || ""
             }
         };
 
@@ -86,16 +89,21 @@ module.exports.createCafes = (event, context, callback) => {
     });
 };
 
-/* GET /cafe/{id} */
-module.exports.getCafe = (event, context, callback) => {
+/* GET /cafe/{city}/{cafe} */
+module.exports.lookupCafe = (event, context, callback) => {
     const params = {
         TableName: "thirdwavelist-cafe",
-        Key: {
-            uid: event.pathParameters.id
-        }
+        ExpressionAttributeNames: {
+            "#name": "extra_url_name"
+        },
+        ExpressionAttributeValues: {
+            ":city": event.pathParameters.city, 
+            ":cafe": event.pathParameters.cafe
+        },
+        FilterExpression: "city = :city AND #name = :cafe"
     };
 
-    db.get(params, (error, result) => {
+    db.scan(params, (error, result) => {
         if (error) {
             callback(null, {
                 statusCode: error.statusCode || 501,
@@ -108,7 +116,7 @@ module.exports.getCafe = (event, context, callback) => {
         const response = {
             statusCode: 200,
             headers: { 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify(result.Item)
+            body: JSON.stringify(result.Items[0])
         };
         callback(null, response);
     });
