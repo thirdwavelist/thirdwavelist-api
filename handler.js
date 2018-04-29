@@ -83,10 +83,12 @@ module.exports.createCafes = (event, context, callback) => {
                 bean_roast_dark: cafe.bean_roast_dark || false,
                 bean_origin_single: cafe.bean_origin_single || false,
                 bean_origin_blend: cafe.bean_origin_blend || false,
-                price_doppio: cafe.price_doppio || "Ft0.00",
+                price_doppio: cafe.price_doppio || "0.00",
                 extra_google_placeid: cafe.extra_google_placeid || "",
                 extra_instagram_locationid: cafe.extra_instagram_locationid || "",
-                latlong: cafe.latlong || ""
+                latlong: cafe.latlong || "",
+                photographer_name: cafe.photographer_name || "",
+                photographer_link: cafe.photographer_link || ""
             }
         };
 
