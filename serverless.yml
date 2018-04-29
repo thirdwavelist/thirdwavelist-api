@@ -8,10 +8,6 @@ provider:
   stage: v1
   runtime: nodejs6.10
   iamRoleStatements:
-    - Effect: "Allow"
-      Action:
-        - es:*
-      Resource: "arn:aws:es:us-east-1:597411703460:domain/cafe"
     - Effect: Allow
       Action:
         - dynamodb:Query
@@ -20,16 +16,19 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:us-east-1:*:table/thirdwavelist-v1-cafe*"
+      Resource: "arn:aws:dynamodb:us-east-1:*:table/thirdwavelist-cafe*"
     - Effect: Allow
       Action:
         - dynamodb:Query
         - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem      
-      Resource: "arn:aws:dynamodb:us-east-1:*:table/thirdwavelist-v1-roaster*"
+        - dynamodb:GetItem     
+      Resource: "arn:aws:dynamodb:us-east-1:*:table/thirdwavelist-roaster*"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem     
+      Resource: "arn:aws:dynamodb:us-east-1:*:table/thirdwavelist-city*"
   usagePlan:
     quota:
       limit: 5000
@@ -87,12 +86,12 @@ functions:
           private: true
           cors: true
 
-  createRoasters:
-    handler: handler.createRoasters
+  listCities:
+    handler: handler.listCities
     events:
       - http:
-          path: roaster
-          method: post
+          path: cities
+          method: get
           private: true
           cors: true
           
@@ -100,7 +99,7 @@ resources:
   Resources:
     CafeDynamoDbTable:
       Type: 'AWS::DynamoDB::Table'
-      DeletionPolicy: Delete
+      DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
           - AttributeName: uid
@@ -111,10 +110,10 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: "thirdwavelist-v1-cafe"
+        TableName: "thirdwavelist-cafe"
     RoasterDynamoDbTable:
       Type: 'AWS::DynamoDB::Table'
-      DeletionPolicy: Delete
+      DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
           - AttributeName: uid
@@ -125,4 +124,18 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: "thirdwavelist-v1-roaster"
+        TableName: "thirdwavelist-roaster"
+    CityDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: value
+            AttributeType: S
+        KeySchema:
+          - AttributeName: value
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: "thirdwavelist-city"

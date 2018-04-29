@@ -2,13 +2,34 @@ const moment = require('moment');
 const uuid = require('node-uuid');
 const aws = require('aws-sdk');
 const db = new aws.DynamoDB.DocumentClient();
-const aeclient = require('aws-elasticsearch-client');
 
 /* GET /cafe */
 module.exports.listCafes = (event, context, callback) => {
-    const params = {
-        TableName: "thirdwavelist-cafe"
-    };
+    let cityFilter = undefined;
+
+    if (event.queryStringParameters !== null && event.queryStringParameters !== undefined) {
+        if (event.queryStringParameters.city !== undefined &&
+            event.queryStringParameters.city !== null &&
+            event.queryStringParameters.city !== "") {
+                cityFilter = event.queryStringParameters.city;
+            }
+    }
+
+    let params = undefined;
+    
+    if (cityFilter !== undefined) {
+        params = {
+            TableName: "thirdwavelist-cafe",
+            ExpressionAttributeValues: {
+                ":city": cityFilter
+            },
+            FilterExpression: "city = :city"
+        };
+    } else {
+        params = {
+            TableName: "thirdwavelist-cafe",
+        };
+    }
 
     db.scan(params, (error, result) => {
         if (error) {
@@ -150,42 +171,6 @@ module.exports.deleteCafe = (event, context, callback) => {
     });
 };
 
-/* POST /roaster */
-module.exports.createRoasters = (event, context, callback) => {
-    const roasters = JSON.parse(event.body);
-    roasters.map((roaster) => {
-        var params = {
-            TableName: "thirdwavelist-roaster",
-            Item: {
-                uid: roaster.uid || uuid.v4(),
-                name: roaster.name || "",
-                link: roaster.link || "",
-                city: roaster.city || "",
-                country: roaster.country || "",
-                flag: roaster.flag || ""
-            }
-        };
-
-        db.put(params, (error) => {
-            if (error) {
-                callback(null, {
-                    statusCode: error.statusCode || 501,
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: 'Couldn\'t create the roaster.'
-                });
-                return;
-            }
-
-            const response = {
-                statusCode: 200,
-                headers: { "Access-Control-Allow-Origin": "*" },
-                body: JSON.stringify({})
-            };
-            callback(null, response);
-        });
-    });
-};
-
 /* GET /roaster */
 module.exports.listRoasters = (event, context, callback) => {
     const params = {
@@ -198,6 +183,31 @@ module.exports.listRoasters = (event, context, callback) => {
                 statusCode: error.statusCode || 501,
                 headers: { 'Content-Type': 'text/plain' },
                 body: 'Couldn\'t fetch the roasters.'
+            });
+            return;
+        }
+
+        const response = {
+            statusCode: 200,
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify(result.Items)
+        };
+        callback(null, response);
+    });
+};
+
+/* GET /cities */
+module.exports.listCities = (event, context, callback) => {
+    const params = {
+        TableName: "thirdwavelist-city"
+    };
+
+    db.scan(params, (error, result) => {
+        if (error) {
+            callback(null, {
+                statusCode: error.statusCode || 501,
+                headers: { 'Content-Type': 'text/plain' },
+                body: 'Couldn\'t fetch the cities.'
             });
             return;
         }
