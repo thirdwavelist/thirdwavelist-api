@@ -11,7 +11,7 @@
   "dependencies": {
     "aws-sdk": "2.138.0",
     "moment": "2.19.3",
-    "node-uuid": "1.4.3",
+    "node-uuid": "1.4.8",
     "serverless": "^1.26.1"
   },
   "bundledDependencies": [
